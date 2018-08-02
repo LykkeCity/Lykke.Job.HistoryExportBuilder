@@ -37,7 +37,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.1.1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Lykke.Job.HistoryExportBuilder.Contract\Lykke.Job.HistoryExportBuilder.Contract.csproj" />
+    <ProjectReference Include="..\..\client\Lykke.Job.HistoryExportBuilder.Contract\Lykke.Job.HistoryExportBuilder.Contract.csproj" />
     <ProjectReference Include="..\Lykke.Job.HistoryExportBuilder.AzureRepositories\Lykke.Job.HistoryExportBuilder.AzureRepositories.csproj" />
     <ProjectReference Include="..\Lykke.Job.HistoryExportBuilder.Core\Lykke.Job.HistoryExportBuilder.Core.csproj" />
     <ProjectReference Include="..\Lykke.Job.HistoryExportBuilder.Services\Lykke.Job.HistoryExportBuilder.Services.csproj" />
