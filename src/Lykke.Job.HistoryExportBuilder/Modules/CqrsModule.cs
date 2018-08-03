@@ -5,6 +5,7 @@ using Lykke.Cqrs;
 using Lykke.Cqrs.Configuration;
 using Lykke.Job.HistoryExportBuilder.Contract;
 using Lykke.Job.HistoryExportBuilder.Contract.Commands;
+using Lykke.Job.HistoryExportBuilder.Contract.Events;
 using Lykke.Job.HistoryExportBuilder.Core.Services;
 using Lykke.Job.HistoryExportBuilder.Cqrs.CommandHandlers;
 using Lykke.Job.HistoryExportBuilder.Settings;
@@ -54,12 +55,6 @@ namespace Lykke.Job.HistoryExportBuilder.Modules
                 }),
                 new RabbitMqTransportFactory());
             
-            var sagasEndpointResolver = new RabbitMqConventionEndpointResolver(
-                "SagasRabbitMq",
-                "messagepack",
-                environment: "lykke",
-                exclusiveQueuePostfix: "k8s");
-            
             builder.Register(ctx =>
                 {
                     return new CqrsEngine(_log,
@@ -75,8 +70,11 @@ namespace Lykke.Job.HistoryExportBuilder.Modules
                     
                         Register.BoundedContext(HistoryExportBuilderBoundedContext.Name)
                             .ListeningCommands(typeof(ExportClientHistoryCommand))
-                            .On("commands")
-                            .WithLoopback()
+                                .On("commands")
+                            .PublishingEvents(
+                                typeof(ClientHistoryExportedEvent),
+                                typeof(ClientHistoryExpiredEvent))
+                                .With("events")
                             .WithCommandsHandler<ExportClientHistoryCommandHandler>()
                     );
                 })

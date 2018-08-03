@@ -18,6 +18,7 @@ namespace Lykke.Job.HistoryExportBuilder.AzureRepositories
         
         public async Task<Uri> UploadAsync(string id, FileType type, MemoryStream file)
         {
+            file = new MemoryStream(file.ToArray());
             return new Uri(await _blobStorage.SaveBlobAsync("historyexports", $"{id}.{GetExtention(type)}", file));
         }
 

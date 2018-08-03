@@ -10,7 +10,7 @@ namespace Lykke.Job.HistoryExportBuilder.AzureRepositories.ExpiriesRepository
     public class ExpiryEntryRepository : IExpiryWatcher
     {
         public const string TableName = "HistoryExportExpiryEntries";
-        
+
         private readonly INoSQLTableStorage<ExpiryEntryEntity> _tableStorage;
 
         public ExpiryEntryRepository(
@@ -19,25 +19,31 @@ namespace Lykke.Job.HistoryExportBuilder.AzureRepositories.ExpiriesRepository
             _tableStorage = tableStorage;
         }
 
-        public Task AddAsync(IExpiryEntry entry)
+        public async Task AddAsync(IExpiryEntry entry)
         {
-            return Task.WhenAll(
-                _tableStorage.InsertOrMergeAsync(new ExpiryEntryEntity
-                {
-                    PartitionKey = entry.ClientId,
-                    RowKey = entry.RequestId,
-                    ClientId = entry.ClientId,
-                    RequestId = entry.RequestId,
-                    ExpiryDateTime = entry.ExpiryDateTime
-                }),
-                _tableStorage.InsertOrMergeAsync(new ExpiryEntryEntity
-                {
-                    PartitionKey = ExpiryEntryEntity.GeneratePartitionKey(),
-                    RowKey = ExpiryEntryEntity.GenerateRowKey(entry.ExpiryDateTime, entry.RequestId),
-                    ClientId = entry.ClientId,
-                    RequestId = entry.RequestId,
-                    ExpiryDateTime = entry.ExpiryDateTime
-                }));
+            var alreadyExisted = !await
+                _tableStorage.TryInsertAsync(
+                    new ExpiryEntryEntity
+                    {
+                        PartitionKey = entry.ClientId,
+                        RowKey = entry.RequestId,
+                        ClientId = entry.ClientId,
+                        RequestId = entry.RequestId,
+                        ExpiryDateTime = entry.ExpiryDateTime
+                    });
+
+            if (!alreadyExisted)
+            {
+                await _tableStorage.InsertAsync(
+                    new ExpiryEntryEntity
+                    {
+                        PartitionKey = ExpiryEntryEntity.GeneratePartitionKey(),
+                        RowKey = ExpiryEntryEntity.GenerateRowKey(entry.ExpiryDateTime, entry.RequestId),
+                        ClientId = entry.ClientId,
+                        RequestId = entry.RequestId,
+                        ExpiryDateTime = entry.ExpiryDateTime
+                    });
+            }
         }
 
         public Task RemoveAsync(IExpiryEntry entry)

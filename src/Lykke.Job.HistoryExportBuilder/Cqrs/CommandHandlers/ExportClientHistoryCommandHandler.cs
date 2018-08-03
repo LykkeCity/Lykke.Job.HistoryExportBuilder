@@ -39,40 +39,48 @@ namespace Lykke.Job.HistoryExportBuilder.Cqrs.CommandHandlers
         [UsedImplicitly]
         public async Task<CommandHandlingResult> Handle(ExportClientHistoryCommand command, IEventPublisher publisher)
         {
-            var operationsHistoryResponse =
-                await _operationsHistory.GetByClientId(
-                    command.ClientId,
-                    command.OperationTypes,
-                    command.AssetId,
-                    command.AssetPairId,
-                    command.Take.Value,
-                    command.Skip);
-            
-            if(operationsHistoryResponse.Error != null)
-                throw new Exception(operationsHistoryResponse.Error.Message);
-
-            var idForUri = await _fileMapper.MapAsync(command.ClientId, command.Id);
-
-            var file = await _fileMaker.MakeAsync(operationsHistoryResponse.Records);
-
-            var uri = await _fileUploader.UploadAsync(idForUri, FileType.Csv, file);
-
-            await _expiryWatcher.AddAsync(
-                new ExpiryEntry
-                {
-                    ClientId = command.ClientId,
-                    RequestId = command.Id,
-                    ExpiryDateTime = DateTime.UtcNow + _ttl
-                });
-            
-            publisher.PublishEvent(new ClientHistoryExportedEvent
+            try
             {
-                Id = command.Id,
-                ClientId = command.ClientId,
-                Uri = uri
-            });
-            
-            return CommandHandlingResult.Ok();
+                var operationsHistoryResponse =
+                    await _operationsHistory.GetByClientId(
+                        command.ClientId,
+                        command.OperationTypes,
+                        command.AssetId,
+                        command.AssetPairId,
+                        command.Take.Value,
+                        command.Skip);
+
+                if (operationsHistoryResponse.Error != null)
+                    throw new Exception(operationsHistoryResponse.Error.Message);
+
+                var idForUri = await _fileMapper.MapAsync(command.ClientId, command.Id);
+
+                var file = await _fileMaker.MakeAsync(operationsHistoryResponse.Records);
+
+                var uri = await _fileUploader.UploadAsync(idForUri, FileType.Csv, file);
+
+                await _expiryWatcher.AddAsync(
+                    new ExpiryEntry
+                    {
+                        ClientId = command.ClientId,
+                        RequestId = command.Id,
+                        ExpiryDateTime = DateTime.UtcNow + _ttl
+                    });
+
+                publisher.PublishEvent(new ClientHistoryExportedEvent
+                {
+                    Id = command.Id,
+                    ClientId = command.ClientId,
+                    Uri = uri
+                });
+
+                return CommandHandlingResult.Ok();
+            }
+            catch (Exception e)
+            {
+                var a = 234;
+                throw;
+            }
         }
     }
 }
