@@ -42,7 +42,4 @@
     <ProjectReference Include="..\Lykke.Job.HistoryExportBuilder.Core\Lykke.Job.HistoryExportBuilder.Core.csproj" />
     <ProjectReference Include="..\Lykke.Job.HistoryExportBuilder.Services\Lykke.Job.HistoryExportBuilder.Services.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Cqrs\Sagas" />
-  </ItemGroup>
 </Project>

@@ -8,6 +8,7 @@ using Lykke.Job.HistoryExportBuilder.Contract.Commands;
 using Lykke.Job.HistoryExportBuilder.Contract.Events;
 using Lykke.Job.HistoryExportBuilder.Core.Services;
 using Lykke.Job.HistoryExportBuilder.Cqrs.CommandHandlers;
+using Lykke.Job.HistoryExportBuilder.Cqrs.Projections;
 using Lykke.Job.HistoryExportBuilder.Settings;
 using Lykke.Messaging;
 using Lykke.Messaging.RabbitMq;
@@ -47,6 +48,8 @@ namespace Lykke.Job.HistoryExportBuilder.Modules
                 ))
                 .As<ExportClientHistoryCommandHandler>()
                 .SingleInstance();
+
+            builder.RegisterType<ExpiryProjection>().SingleInstance();
             
             var messagingEngine = new MessagingEngine(_log,
                 new TransportResolver(new Dictionary<string, TransportInfo>
@@ -71,11 +74,13 @@ namespace Lykke.Job.HistoryExportBuilder.Modules
                         Register.BoundedContext(HistoryExportBuilderBoundedContext.Name)
                             .ListeningCommands(typeof(ExportClientHistoryCommand))
                                 .On("commands")
+                            .WithCommandsHandler<ExportClientHistoryCommandHandler>()
                             .PublishingEvents(
                                 typeof(ClientHistoryExportedEvent),
                                 typeof(ClientHistoryExpiredEvent))
                                 .With("events")
-                            .WithCommandsHandler<ExportClientHistoryCommandHandler>()
+                            .WithLoopback()
+                            .WithProjection(typeof(ExpiryProjection), HistoryExportBuilderBoundedContext.Name)
                     );
                 })
                 .As<ICqrsEngine>()

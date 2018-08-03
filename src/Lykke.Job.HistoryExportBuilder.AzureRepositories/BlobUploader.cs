@@ -10,6 +10,7 @@ namespace Lykke.Job.HistoryExportBuilder.AzureRepositories
     public class BlobUploader : IFileUploader
     {
         private readonly IBlobStorage _blobStorage;
+        private const string ContainerName = "historyexports";
 
         public BlobUploader(IBlobStorage blobStorage)
         {
@@ -18,23 +19,23 @@ namespace Lykke.Job.HistoryExportBuilder.AzureRepositories
         
         public async Task<Uri> UploadAsync(string id, FileType type, MemoryStream file)
         {
+            var key = $"{id}.{GetExtention(type)}";
+
+            if (await _blobStorage.HasBlobAsync(ContainerName, key))
+                return new Uri(await Task.Run(() => _blobStorage.GetBlobUrl(ContainerName, key)));
+
             file = new MemoryStream(file.ToArray());
-            return new Uri(await _blobStorage.SaveBlobAsync("historyexports", $"{id}.{GetExtention(type)}", file));
+            return new Uri(await _blobStorage.SaveBlobAsync(ContainerName, key, file));
+
         }
 
-        public Task RemoveAsync(string id, FileType type)
+        public async Task RemoveAsync(string id, FileType type)
         {
-            return _blobStorage.DelBlobAsync("historyexports", $"{id}.{GetExtention(type)}");
-        }
+            var key = $"{id}.{GetExtention(type)}";
 
-        private string GetMimeType(FileType type)
-        {
-            switch (type)
+            if (await _blobStorage.HasBlobAsync(ContainerName, key))
             {
-                case FileType.Csv:
-                    return "text/csv";
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
+                await _blobStorage.DelBlobAsync(ContainerName, key);
             }
         }
 
