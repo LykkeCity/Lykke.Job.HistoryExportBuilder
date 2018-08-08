@@ -11,7 +11,7 @@ namespace Lykke.Job.HistoryExportBuilder.Settings
         public SlackNotificationsSettings SlackNotifications { get; set; }
         public OperationsHistoryServiceClientSettings OperationsHistoryServiceClient { get; set; }
         public SagasRabbitMq SagasRabbitMq { get; set; }
-        [Optional]
+        public AssetsServiceClientSettings AssetsServiceClient { get; set; }
         public MonitoringServiceClientSettings MonitoringServiceClient { get; set; }
     }
     
@@ -21,5 +21,11 @@ namespace Lykke.Job.HistoryExportBuilder.Settings
         public string RabbitConnectionString { get; set; }
 
         public string RetryDelay { get; set; }
+    }
+
+    public class AssetsServiceClientSettings
+    {
+        [HttpCheck("/api/isalive")]
+        public string ServiceUrl { get; set; }
     }
 }
