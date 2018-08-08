@@ -4,7 +4,7 @@
     <Version>1.0.0</Version>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Lykke.Service.OperationsHistory.Client" Version="2.2.0" />
-    <PackageReference Include="Lykke.Common" Version="7.0.2" />
+    <PackageReference Include="Lykke.Service.OperationsHistory.Client" Version="2.2.2" />
+    <PackageReference Include="Lykke.Common" Version="7.0.3" />
   </ItemGroup>
 </Project>

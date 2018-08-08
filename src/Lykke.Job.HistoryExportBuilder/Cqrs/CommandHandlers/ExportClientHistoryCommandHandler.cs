@@ -47,8 +47,8 @@ namespace Lykke.Job.HistoryExportBuilder.Cqrs.CommandHandlers
                         command.OperationTypes,
                         command.AssetId,
                         command.AssetPairId,
-                        command.Take.Value,
-                        command.Skip);
+                        null,
+                        0);
 
                 if (operationsHistoryResponse.Error != null)
                     throw new Exception(operationsHistoryResponse.Error.Message);

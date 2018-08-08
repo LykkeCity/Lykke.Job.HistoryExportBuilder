@@ -12,9 +12,5 @@ namespace Lykke.Job.HistoryExportBuilder.Contract.Commands
         public HistoryOperationType[] OperationTypes { set; get; }
         public string AssetId { set; get; }
         public string AssetPairId { set; get; }
-        public int Skip { set; get; }
-        public int? Take { set; get; }
-    }
-    
-    
+    }    
 }
