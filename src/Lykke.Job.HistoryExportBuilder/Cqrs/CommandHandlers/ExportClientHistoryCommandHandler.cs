@@ -35,52 +35,44 @@ namespace Lykke.Job.HistoryExportBuilder.Cqrs.CommandHandlers
             _expiryWatcher = expiryWatcher;
             _ttl = ttl;
         }
-        
+
         [UsedImplicitly]
         public async Task<CommandHandlingResult> Handle(ExportClientHistoryCommand command, IEventPublisher publisher)
         {
-            try
-            {
-                var operationsHistoryResponse =
-                    await _operationsHistory.GetByClientId(
-                        command.ClientId,
-                        command.OperationTypes,
-                        command.AssetId,
-                        command.AssetPairId,
-                        null,
-                        0);
+            var operationsHistoryResponse =
+                await _operationsHistory.GetByClientId(
+                    command.ClientId,
+                    command.OperationTypes,
+                    command.AssetId,
+                    command.AssetPairId,
+                    null,
+                    0);
 
-                if (operationsHistoryResponse.Error != null)
-                    throw new Exception(operationsHistoryResponse.Error.Message);
+            if (operationsHistoryResponse.Error != null)
+                throw new Exception(operationsHistoryResponse.Error.Message);
 
-                var idForUri = await _fileMapper.MapAsync(command.ClientId, command.Id);
+            var idForUri = await _fileMapper.MapAsync(command.ClientId, command.Id);
 
-                var file = await _fileMaker.MakeAsync(operationsHistoryResponse.Records);
+            var file = await _fileMaker.MakeAsync(operationsHistoryResponse.Records);
 
-                var uri = await _fileUploader.UploadAsync(idForUri, FileType.Csv, file);
+            var uri = await _fileUploader.UploadAsync(idForUri, FileType.Csv, file);
 
-                await _expiryWatcher.AddAsync(
-                    new ExpiryEntry
-                    {
-                        ClientId = command.ClientId,
-                        RequestId = command.Id,
-                        ExpiryDateTime = DateTime.UtcNow + _ttl
-                    });
-
-                publisher.PublishEvent(new ClientHistoryExportedEvent
+            await _expiryWatcher.AddAsync(
+                new ExpiryEntry
                 {
-                    Id = command.Id,
                     ClientId = command.ClientId,
-                    Uri = uri
+                    RequestId = command.Id,
+                    ExpiryDateTime = DateTime.UtcNow + _ttl
                 });
 
-                return CommandHandlingResult.Ok();
-            }
-            catch (Exception e)
+            publisher.PublishEvent(new ClientHistoryExportedEvent
             {
-                var a = 234;
-                throw;
-            }
+                Id = command.Id,
+                ClientId = command.ClientId,
+                Uri = uri
+            });
+
+            return CommandHandlingResult.Ok();
         }
     }
 }
