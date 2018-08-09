@@ -20,7 +20,6 @@ namespace Lykke.Job.HistoryExportBuilder.Modules
         private readonly HistoryExportBuilderSettings _settings;
         private readonly IReloadingManager<HistoryExportBuilderSettings> _settingsManager;
         private readonly ILog _log;
-        // NOTE: you can remove it if you don't need to use IServiceCollection extensions to register service specific dependencies
         private readonly IServiceCollection _services;
 
         public JobModule(HistoryExportBuilderSettings settings, IReloadingManager<HistoryExportBuilderSettings> settingsManager, ILog log)

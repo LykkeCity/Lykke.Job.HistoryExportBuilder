@@ -3,10 +3,8 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Common.Log;
 using Lykke.Job.HistoryExportBuilder.Settings;
-using Lykke.Job.HistoryExportBuilder.Settings.JobSettings;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.OperationsHistory.Client;
-using Lykke.SettingsReader;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Lykke.Job.HistoryExportBuilder.Modules
