@@ -25,8 +25,8 @@ namespace Lykke.Job.HistoryExportBuilder.AzureRepositories.ExpiriesRepository
                 _tableStorage.TryInsertAsync(
                     new ExpiryEntryEntity
                     {
-                        PartitionKey = entry.ClientId,
-                        RowKey = entry.RequestId,
+                        PartitionKey = ExpiryEntryEntity.ByClient.GeneratePartitionKey(entry.ClientId),
+                        RowKey = ExpiryEntryEntity.ByClient.GenerateRowKey(entry.RequestId),
                         ClientId = entry.ClientId,
                         RequestId = entry.RequestId,
                         ExpiryDateTime = entry.ExpiryDateTime
@@ -37,8 +37,8 @@ namespace Lykke.Job.HistoryExportBuilder.AzureRepositories.ExpiriesRepository
                 await _tableStorage.InsertAsync(
                     new ExpiryEntryEntity
                     {
-                        PartitionKey = ExpiryEntryEntity.GeneratePartitionKey(),
-                        RowKey = ExpiryEntryEntity.GenerateRowKey(entry.ExpiryDateTime, entry.RequestId),
+                        PartitionKey = ExpiryEntryEntity.ByDateTime.GeneratePartitionKey(),
+                        RowKey = ExpiryEntryEntity.ByDateTime.GenerateRowKey(entry.ExpiryDateTime, entry.RequestId),
                         ClientId = entry.ClientId,
                         RequestId = entry.RequestId,
                         ExpiryDateTime = entry.ExpiryDateTime
@@ -50,17 +50,17 @@ namespace Lykke.Job.HistoryExportBuilder.AzureRepositories.ExpiriesRepository
         {
             return Task.WhenAll(
                 _tableStorage.DeleteIfExistAsync(
-                    entry.ClientId,
-                    entry.RequestId),
+                    ExpiryEntryEntity.ByClient.GeneratePartitionKey(entry.ClientId),
+                    ExpiryEntryEntity.ByClient.GenerateRowKey(entry.RequestId)),
                 _tableStorage.DeleteIfExistAsync(
-                    ExpiryEntryEntity.GeneratePartitionKey(),
-                    ExpiryEntryEntity.GenerateRowKey(entry.ExpiryDateTime, entry.RequestId)));
+                    ExpiryEntryEntity.ByDateTime.GeneratePartitionKey(),
+                    ExpiryEntryEntity.ByDateTime.GenerateRowKey(entry.ExpiryDateTime, entry.RequestId)));
         }
 
         public async Task<IEnumerable<IExpiryEntry>> GetSoonestAsync(int n)
         {
             return await _tableStorage.GetTopRecordsAsync(
-                ExpiryEntryEntity.GeneratePartitionKey(),
+                ExpiryEntryEntity.ByDateTime.GeneratePartitionKey(),
                 n);
         }
     }

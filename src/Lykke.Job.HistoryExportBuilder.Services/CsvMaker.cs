@@ -25,8 +25,8 @@ namespace Lykke.Job.HistoryExportBuilder.Services
         
         public async Task<MemoryStream> MakeAsync(IEnumerable<HistoryOperation> operations)
         {
-            var assets = await _assetsServiceWithCache.GetAllAssetsAsync();
-            var assetPairs = await _assetsServiceWithCache.GetAllAssetPairsAsync();
+            var assets = (await _assetsServiceWithCache.GetAllAssetsAsync()).ToDictionary(x => x.Id);
+            var assetPairs = (await _assetsServiceWithCache.GetAllAssetPairsAsync()).ToDictionary(x => x.Id);
             
             using (var stream = new MemoryStream())
             {
@@ -37,7 +37,7 @@ namespace Lykke.Job.HistoryExportBuilder.Services
 
                     userCsv.WriteRecords(operations.Select(x =>
                     {
-                        var assetPair = assetPairs.FirstOrDefault(y => y.Id == x.AssetPair);
+                        var assetPair = assetPairs[x.AssetPair];
                         
                         decimal baseAmount;
                         decimal? quoteAmount;
@@ -63,10 +63,10 @@ namespace Lykke.Job.HistoryExportBuilder.Services
                             Type = x.Type.ToString(),
                             Exchange = "Lykke",
                             BaseAmount = baseAmount,
-                            BaseCurrency = assets.Single(y => y.Id == (assetPair != null ? assetPair.BaseAssetId : x.Asset)).DisplayId,
+                            BaseCurrency = assets[assetPair != null ? assetPair.BaseAssetId : x.Asset].DisplayId,
                             QuoteAmount = quoteAmount,
-                            QuoteCurrency = assetPair?.QuotingAssetId != null ? assets.Single(y => y.Id == assetPair.QuotingAssetId).DisplayId : null,
-                            FeeCurrency = assets.Single(y => y.Id == x.Asset).DisplayId,
+                            QuoteCurrency = assetPair?.QuotingAssetId != null ? assets[assetPair.QuotingAssetId].DisplayId : null,
+                            FeeCurrency = assets[x.Asset].DisplayId,
                             Fee = Convert.ToDecimal(x.FeeSize)
                         };
                     }));

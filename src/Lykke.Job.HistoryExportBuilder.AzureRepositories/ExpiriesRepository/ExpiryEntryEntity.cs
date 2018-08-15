@@ -10,14 +10,30 @@ namespace Lykke.Job.HistoryExportBuilder.AzureRepositories.ExpiriesRepository
         public string RequestId { get; set; }
         public DateTime ExpiryDateTime { get; set; }
 
-        public static string GeneratePartitionKey()
+        public static class ByDateTime
         {
-            return "part";
+            public static string GeneratePartitionKey()
+            {
+                return "part";
+            }
+
+            public static string GenerateRowKey(DateTime expiryDateTime, string requestId)
+            {
+                return expiryDateTime.Ticks.ToString("D25") + requestId;
+            }
         }
 
-        public static string GenerateRowKey(DateTime expiryDateTime, string requestId)
+        public static class ByClient
         {
-            return expiryDateTime.Ticks.ToString("D25") + requestId;
+            public static string GeneratePartitionKey(string clientId)
+            {
+                return clientId;
+            }
+
+            public static string GenerateRowKey(string requestId)
+            {
+                return requestId;
+            }
         }
     }
 }

@@ -125,8 +125,9 @@ namespace Lykke.Job.HistoryExportBuilder
 
                 await ApplicationContainer.Resolve<IStartupManager>().StartAsync();
                 await Log.WriteMonitorAsync("", Program.EnvInfo, "Started");
-
+#if !DEBUG
                 await AutoRegistrationInMonitoring.RegisterAsync(Configuration, _monitoringServiceUrl, Log);
+#endif
             }
             catch (Exception ex)
             {
@@ -189,7 +190,7 @@ namespace Lykke.Job.HistoryExportBuilder
 
             if (string.IsNullOrEmpty(dbLogConnectionString))
             {
-                consoleLogger.WriteWarningAsync(nameof(Startup), nameof(CreateLogWithSlack), "Table loggger is not inited").Wait();
+                consoleLogger.WriteWarning(nameof(Startup), nameof(CreateLogWithSlack), "Table loggger is not inited");
                 return aggregateLogger;
             }
 
