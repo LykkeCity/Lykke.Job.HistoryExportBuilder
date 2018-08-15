@@ -50,7 +50,8 @@ namespace Lykke.Job.HistoryExportBuilder.Modules
                 {
                     var logFactory = ctx.Resolve<ILogFactory>();
 
-                    var messagingEngine = new MessagingEngine(logFactory,
+                    var messagingEngine = new MessagingEngine(
+                        logFactory,
                         new TransportResolver(new Dictionary<string, TransportInfo>
                         {
                             {
@@ -58,7 +59,8 @@ namespace Lykke.Job.HistoryExportBuilder.Modules
                                 new TransportInfo(rabbitMqSagasSettings.Endpoint.ToString(),
                                     rabbitMqSagasSettings.UserName, rabbitMqSagasSettings.Password, "None", "RabbitMq")
                             }
-                        }));
+                        }),
+                        new RabbitMqTransportFactory(logFactory));
                     
                     return new CqrsEngine(logFactory,
                         ctx.Resolve<IDependencyResolver>(),
