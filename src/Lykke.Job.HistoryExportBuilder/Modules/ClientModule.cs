@@ -5,31 +5,25 @@ using Common.Log;
 using Lykke.Job.HistoryExportBuilder.Settings;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.OperationsHistory.Client;
+using Lykke.SettingsReader;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Lykke.Job.HistoryExportBuilder.Modules
 {
     public class ClientModule : Module
     {
-        private readonly AppSettings _settings;
-        private readonly ILog _log;
-        private readonly IServiceCollection _services;
+        private readonly IReloadingManager<AppSettings> _settings;
 
-        public ClientModule(AppSettings settings, ILog log)
+        public ClientModule(IReloadingManager<AppSettings> settings)
         {
             _settings = settings;
-            _log = log;
-            
-            _services = new ServiceCollection();
         }
 
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterOperationsHistoryClient(_settings.OperationsHistoryServiceClient, _log);
+            builder.RegisterOperationsHistoryClient(_settings.CurrentValue.OperationsHistoryServiceClient);
             
-            _services.RegisterAssetsClient(AssetServiceSettings.Create(new Uri(_settings.AssetsServiceClient.ServiceUrl), TimeSpan.FromMinutes(3)), _log);
-            
-            builder.Populate(_services);
+            builder.RegisterAssetsClient(AssetServiceSettings.Create(new Uri(_settings.CurrentValue.AssetsServiceClient.ServiceUrl), TimeSpan.FromMinutes(3)));
         }
     }
 }

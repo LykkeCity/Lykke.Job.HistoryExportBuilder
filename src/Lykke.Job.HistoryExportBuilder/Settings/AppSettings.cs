@@ -1,11 +1,14 @@
-﻿using Lykke.Job.HistoryExportBuilder.Settings.JobSettings;
-using Lykke.Job.HistoryExportBuilder.Settings.SlackNotifications;
+﻿using JetBrains.Annotations;
+using Lykke.Job.HistoryExportBuilder.Settings.JobSettings;
+using Lykke.Sdk.Settings;
 using Lykke.Service.OperationsHistory.Client;
 using Lykke.SettingsReader.Attributes;
+using SlackNotificationsSettings = Lykke.Job.HistoryExportBuilder.Settings.SlackNotifications.SlackNotificationsSettings;
 
 namespace Lykke.Job.HistoryExportBuilder.Settings
 {
-    public class AppSettings
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    public class AppSettings : BaseAppSettings
     {
         public HistoryExportBuilderSettings HistoryExportBuilderJob { get; set; }
         public SlackNotificationsSettings SlackNotifications { get; set; }
