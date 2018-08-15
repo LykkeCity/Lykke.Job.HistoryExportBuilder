@@ -11,6 +11,7 @@ using Lykke.Job.HistoryExportBuilder.Cqrs.CommandHandlers;
 using Lykke.Job.HistoryExportBuilder.Cqrs.Projections;
 using Lykke.Job.HistoryExportBuilder.Settings;
 using Lykke.Messaging;
+using Lykke.Messaging.Contract;
 using Lykke.Messaging.RabbitMq;
 using Lykke.Service.OperationsHistory.Client;
 
@@ -38,51 +39,41 @@ namespace Lykke.Job.HistoryExportBuilder.Modules
             builder.Register(context => new AutofacDependencyResolver(context)).As<IDependencyResolver>();
 
             builder
-                .Register(ctx => new ExportClientHistoryCommandHandler(
-                    ctx.Resolve<IOperationsHistoryClient>(),
-                    ctx.Resolve<IFileMaker>(),
-                    ctx.Resolve<IFileUploader>(),
-                    ctx.Resolve<IFileMapper>(),
-                    ctx.Resolve<IExpiryWatcher>(),
-                    _settings.HistoryExportBuilderJob.GeneratedFileTtl
-                ))
-                .As<ExportClientHistoryCommandHandler>()
-                .SingleInstance();
+                .RegisterType<ExportClientHistoryCommandHandler>()
+                .SingleInstance()
+                .WithParameter("ttl", _settings.HistoryExportBuilderJob.GeneratedFileTtl);
 
             builder.RegisterType<ExpiryProjection>().SingleInstance();
             
-            var messagingEngine = new MessagingEngine(_log,
+            builder.RegisterInstance(new MessagingEngine(_log,
                 new TransportResolver(new Dictionary<string, TransportInfo>
                 {
                     {"RabbitMq", new TransportInfo(rabbitMqSagasSettings.Endpoint.ToString(), rabbitMqSagasSettings.UserName, rabbitMqSagasSettings.Password, "None", "RabbitMq")}
                 }),
-                new RabbitMqTransportFactory());
+                new RabbitMqTransportFactory())).As<IMessagingEngine>();;
             
-            builder.Register(ctx =>
-                {
-                    return new CqrsEngine(_log,
-                        ctx.Resolve<IDependencyResolver>(),
-                        messagingEngine,
-                        new DefaultEndpointProvider(),
-                        true,
-                        Register.DefaultEndpointResolver(new RabbitMqConventionEndpointResolver(
-                            "RabbitMq",
-                            "messagepack",
-                            environment: "lykke",
-                            exclusiveQueuePostfix: "k8s")),
+            builder.Register(ctx => new CqrsEngine(_log,
+                    ctx.Resolve<IDependencyResolver>(),
+                    ctx.Resolve<IMessagingEngine>(),
+                    new DefaultEndpointProvider(),
+                    true,
+                    Register.DefaultEndpointResolver(new RabbitMqConventionEndpointResolver(
+                        "RabbitMq",
+                        "messagepack",
+                        environment: "lykke",
+                        exclusiveQueuePostfix: "k8s")),
                     
-                        Register.BoundedContext(HistoryExportBuilderBoundedContext.Name)
-                            .ListeningCommands(typeof(ExportClientHistoryCommand))
-                                .On("commands")
-                            .WithCommandsHandler<ExportClientHistoryCommandHandler>()
-                            .PublishingEvents(
-                                typeof(ClientHistoryExportedEvent),
-                                typeof(ClientHistoryExpiredEvent))
-                                .With("events")
-                            .WithLoopback()
-                            .WithProjection(typeof(ExpiryProjection), HistoryExportBuilderBoundedContext.Name)
-                    );
-                })
+                    Register.BoundedContext(HistoryExportBuilderBoundedContext.Name)
+                        .ListeningCommands(typeof(ExportClientHistoryCommand))
+                        .On("commands")
+                        .WithCommandsHandler<ExportClientHistoryCommandHandler>()
+                        .PublishingEvents(
+                            typeof(ClientHistoryExportedEvent),
+                            typeof(ClientHistoryExpiredEvent))
+                        .With("events")
+                        .WithLoopback()
+                        .WithProjection(typeof(ExpiryProjection), HistoryExportBuilderBoundedContext.Name)
+                ))
                 .As<ICqrsEngine>()
                 .SingleInstance()
                 .AutoActivate();

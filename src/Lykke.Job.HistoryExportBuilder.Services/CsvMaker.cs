@@ -37,7 +37,7 @@ namespace Lykke.Job.HistoryExportBuilder.Services
 
                     userCsv.WriteRecords(operations.Select(x =>
                     {
-                        var assetPair = assetPairs[x.AssetPair];
+                        var assetPair = x.AssetPair != null ? assetPairs[x.AssetPair] : null;
                         
                         decimal baseAmount;
                         decimal? quoteAmount;
