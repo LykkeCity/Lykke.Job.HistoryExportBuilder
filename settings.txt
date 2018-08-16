@@ -4,7 +4,7 @@
     "Db":
     {
       "LogsConnString": "${LogsConnString}:[AzureTableStorage]",
-      "LogsConnString": "${DataConnString}:[AzureTableStorage]"
+      "DataConnString": "${DataConnString}:[AzureTableStorage]"
     },
     "GeneratedFileTtl ": "00:15:00"
   },
