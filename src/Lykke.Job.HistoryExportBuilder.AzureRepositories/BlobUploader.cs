@@ -22,7 +22,7 @@ namespace Lykke.Job.HistoryExportBuilder.AzureRepositories
             var key = $"{id}.{GetExtention(type)}";
 
             if (await _blobStorage.HasBlobAsync(ContainerName, key))
-                return new Uri(await Task.Run(() => _blobStorage.GetBlobUrl(ContainerName, key)));
+                return new Uri(_blobStorage.GetBlobUrl(ContainerName, key));
 
             file = new MemoryStream(file.ToArray());
             return new Uri(await _blobStorage.SaveBlobAsync(ContainerName, key, file));

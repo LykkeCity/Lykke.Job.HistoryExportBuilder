@@ -3,8 +3,10 @@
   {
     "Db":
     {
-      "LogsConnString": "${LogsConnString}:[AzureTableStorage]"
-    }
+      "LogsConnString": "${LogsConnString}:[AzureTableStorage]",
+      "LogsConnString": "${DataConnString}:[AzureTableStorage]"
+    },
+    "GeneratedFileTtl ": "00:15:00"
   },
   "MonitoringServiceClient": 
   {

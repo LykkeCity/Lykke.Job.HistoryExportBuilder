@@ -42,7 +42,6 @@ namespace Lykke.Job.HistoryExportBuilder.Modules
         {
             builder.RegisterType<LinkExpiryChecker>()
                 .As<IStartable>()
-                .AutoActivate()
                 .SingleInstance();
         }
 
