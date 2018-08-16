@@ -45,12 +45,12 @@ namespace Lykke.Job.HistoryExportBuilder.Modules
                 .WithParameter("ttl", _settings.CurrentValue.HistoryExportBuilderJob.GeneratedFileTtl);
 
             builder.RegisterType<ExpiryProjection>().SingleInstance();
-            
+
             builder.Register(ctx =>
                 {
                     var logFactory = ctx.Resolve<ILogFactory>();
 
-                    var messagingEngine = new MessagingEngine(
+                    return new MessagingEngine(
                         logFactory,
                         new TransportResolver(new Dictionary<string, TransportInfo>
                         {
@@ -61,10 +61,17 @@ namespace Lykke.Job.HistoryExportBuilder.Modules
                             }
                         }),
                         new RabbitMqTransportFactory(logFactory));
+                })
+                .As<IMessagingEngine>()
+                .SingleInstance();
+            
+            builder.Register(ctx =>
+                {
+                    var logFactory = ctx.Resolve<ILogFactory>();
                     
                     return new CqrsEngine(logFactory,
                         ctx.Resolve<IDependencyResolver>(),
-                        messagingEngine,
+                        ctx.Resolve<IMessagingEngine>(),
                         new DefaultEndpointProvider(),
                         true,
                         Register.DefaultEndpointResolver(new RabbitMqConventionEndpointResolver(
