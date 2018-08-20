@@ -1,3 +1,10 @@
+AssetsServiceClient:
+  ServiceUrl:
+    settings-key: ServiceUrl
+
+  ExpirationPeriod:
+    settings-key: ExpirationPeriod
+
 HistoryExportBuilderJob:
     Db:
       LogsConnString:
@@ -17,6 +24,18 @@ MonitoringServiceClient:
   MonitoringServiceUrl:
     settings-key: MonitoringServiceUrl
 
+OperationsHistoryServiceClient:
+  ServiceUrl:
+    settings-key: OperationServiceUrl
+
+SagasRabbitMq:
+  RabbitConnectionString:
+    settings-key: RabbitConnStr
+    types:
+      - RabbitMq
+  
+  RetryDelay:
+    settings-key: RetryDelay
 SlackNotifications:
   AzureQueue:
     ConnectionString:
@@ -25,3 +44,6 @@ SlackNotifications:
         - AzureTableStorage
     
     QueueName: slack-notifications
+  
+  ThrottlingLimitSeconds:
+    settings-key: ThrottlingLimitSeconds
