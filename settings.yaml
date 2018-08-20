@@ -26,7 +26,7 @@ MonitoringServiceClient:
 
 OperationsHistoryServiceClient:
   ServiceUrl:
-    settings-key: OperationServiceUrl
+    settings-key: OperationsHistoryServiceUrl
 
 SagasRabbitMq:
   RabbitConnectionString:
