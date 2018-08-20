@@ -46,4 +46,4 @@ SlackNotifications:
     QueueName: slack-notifications
   
   ThrottlingLimitSeconds:
-    settings-key: ThrottlingLimitSeconds
+    settings-key: SlackNotificationsThrottlingLimit
