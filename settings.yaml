@@ -3,7 +3,7 @@ AssetsServiceClient:
     settings-key: AssetsServiceUrl
 
   ExpirationPeriod:
-    settings-key: ExpirationPeriod
+    settings-key: AssetsServiceExpirationPeriod
 
 HistoryExportBuilderJob:
     Db:
