@@ -1,6 +1,6 @@
 AssetsServiceClient:
   ServiceUrl:
-    settings-key: ServiceUrl
+    settings-key: AssetsServiceUrl
 
   ExpirationPeriod:
     settings-key: ExpirationPeriod
