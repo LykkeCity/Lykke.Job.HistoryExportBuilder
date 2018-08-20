@@ -8,12 +8,12 @@ AssetsServiceClient:
 HistoryExportBuilderJob:
     Db:
       LogsConnString:
-        settings-key: LogsConnString
+        settings-key: HistoryExportLogsConnString
         types:
           - AzureTableStorage
       
       DataConnString:
-        settings-key: DataConnString
+        settings-key: HistoryExportDataConnString
         types:
           - AzureTableStorage
     
