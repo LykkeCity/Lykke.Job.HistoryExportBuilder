@@ -30,12 +30,12 @@ OperationsHistoryServiceClient:
 
 SagasRabbitMq:
   RabbitConnectionString:
-    settings-key: RabbitConnStr
+    settings-key: SagasRabbitMqConnStr
     types:
       - RabbitMq
   
   RetryDelay:
-    settings-key: RetryDelay
+    settings-key: SagasRetryDelay
 SlackNotifications:
   AzureQueue:
     ConnectionString:
