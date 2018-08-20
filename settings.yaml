@@ -1,0 +1,27 @@
+HistoryExportBuilderJob:
+    Db:
+      LogsConnString:
+        settings-key: LogsConnString
+        types:
+          - AzureTableStorage
+      
+      DataConnString:
+        settings-key: DataConnString
+        types:
+          - AzureTableStorage
+    
+    GeneratedFileTtl:
+      settings-key: HistoryExportFileTtl
+
+MonitoringServiceClient:
+  MonitoringServiceUrl:
+    settings-key: MonitoringServiceUrl
+
+SlackNotifications:
+  AzureQueue:
+    ConnectionString:
+      settings-key: SlackNotificationsConnString
+      types:
+        - AzureTableStorage
+    
+    QueueName: slack-notifications
