@@ -20,8 +20,6 @@ namespace Lykke.Job.HistoryExportBuilder.Modules
 
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterOperationsHistoryClient(_settings.CurrentValue.OperationsHistoryServiceClient);
-            
             builder.RegisterAssetsClient(AssetServiceSettings.Create(new Uri(_settings.CurrentValue.AssetsServiceClient.ServiceUrl), TimeSpan.FromMinutes(3)));
             
             builder.RegisterHistoryClient(_settings.CurrentValue.HistoryServiceClient);

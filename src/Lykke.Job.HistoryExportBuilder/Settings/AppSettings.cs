@@ -13,7 +13,6 @@ namespace Lykke.Job.HistoryExportBuilder.Settings
     {
         public HistoryExportBuilderSettings HistoryExportBuilderJob { get; set; }
         public SlackNotificationsSettings SlackNotifications { get; set; }
-        public OperationsHistoryServiceClientSettings OperationsHistoryServiceClient { get; set; }
         public ClientAccountServiceClientSettings ClientAccountServiceClient { get; set; }
         public HistoryServiceClientSettings HistoryServiceClient { get; set; }
         public SagasRabbitMq SagasRabbitMq { get; set; }

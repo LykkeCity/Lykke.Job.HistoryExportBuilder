@@ -18,7 +18,6 @@ namespace Lykke.Job.HistoryExportBuilder.Cqrs.CommandHandlers
 {
     public class ExportClientHistoryCommandHandler
     {
-        private readonly IOperationsHistoryClient _operationsHistory;
         private readonly IClientAccountClient _clientAccountClient;
         private readonly IHistoryClient _historyClient;
         private readonly IFileMaker _fileMaker;
@@ -28,7 +27,6 @@ namespace Lykke.Job.HistoryExportBuilder.Cqrs.CommandHandlers
         private readonly TimeSpan _ttl;
 
         public ExportClientHistoryCommandHandler(
-            IOperationsHistoryClient operationsHistory,
             IClientAccountClient clientAccountClient,
             IHistoryClient historyClient,
             IFileMaker fileMaker,
@@ -39,7 +37,6 @@ namespace Lykke.Job.HistoryExportBuilder.Cqrs.CommandHandlers
         {
             _historyClient = historyClient;
             _clientAccountClient = clientAccountClient;
-            _operationsHistory = operationsHistory;
             _fileMaker = fileMaker;
             _fileUploader = fileUploader;
             _fileMapper = fileMapper;
@@ -50,52 +47,31 @@ namespace Lykke.Job.HistoryExportBuilder.Cqrs.CommandHandlers
         [UsedImplicitly]
         public async Task<CommandHandlingResult> Handle(ExportClientHistoryCommand command, IEventPublisher publisher)
         {
-            dynamic history;
-            
-            if (command.OperationTypes2 != null)
-            {
-                var walletIds = await _clientAccountClient.GetClientWalletsFiltered(command.ClientId);
+            var walletIds = await _clientAccountClient.GetClientWalletsFiltered(command.ClientId);
 
-                var tasks = walletIds.Select(async x =>
+            var tasks = walletIds.Select(async x =>
+            {
+                var result = new List<BaseHistoryModel>();
+
+                while (true)
                 {
-                    var result = new List<BaseHistoryModel>();
-                    
-                    while (true)
-                    {
-                        var response = await _historyClient.HistoryApi.GetHistoryByWalletAsync(Guid.Parse(x.Id),
-                            command.OperationTypes2,
-                            command.AssetId,
-                            command.AssetPairId);
-
-                        if (!response.Any())
-                            break;
-                        
-                        result.AddRange(response);
-                    }
-
-                    return result;
-                });
-
-                await Task.WhenAll(tasks);
-
-                history = tasks.SelectMany(x => x.Result).Select(x => x.ToHistoryModel());
-            }
-            else
-            {
-                var response =
-                    await _operationsHistory.GetByClientId(
-                        command.ClientId,
+                    var response = await _historyClient.HistoryApi.GetHistoryByWalletAsync(Guid.Parse(x.Id),
                         command.OperationTypes,
                         command.AssetId,
-                        command.AssetPairId,
-                        null,
-                        0);
-                
-                if (response.Error != null)
-                    throw new Exception(response.Error.Message);
+                        command.AssetPairId);
 
-                history = response.Records;
-            }
+                    if (!response.Any())
+                        break;
+
+                    result.AddRange(response);
+                }
+
+                return result;
+            });
+
+            await Task.WhenAll(tasks);
+
+            var history = tasks.SelectMany(x => x.Result).SelectMany(x => x.ToHistoryModel());
 
             var idForUri = await _fileMapper.MapAsync(command.ClientId, command.Id);
 

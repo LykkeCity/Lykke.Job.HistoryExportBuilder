@@ -9,7 +9,6 @@ namespace Lykke.Job.HistoryExportBuilder.Core.Services
 {
     public interface IFileMaker
     {
-        Task<MemoryStream> MakeAsync(IEnumerable<HistoryOperation> operations);
         Task<MemoryStream> MakeAsync(IEnumerable<HistoryModel> operations);
     }
 }

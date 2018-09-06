@@ -24,10 +24,6 @@ MonitoringServiceClient:
   MonitoringServiceUrl:
     settings-key: MonitoringServiceUrl
 
-OperationsHistoryServiceClient:
-  ServiceUrl:
-    settings-key: OperationsHistoryServiceUrl
-
 ClientAccountServiceClient:
     ServiceUrl:
         settings-key: ClientAccountServiceUrl
