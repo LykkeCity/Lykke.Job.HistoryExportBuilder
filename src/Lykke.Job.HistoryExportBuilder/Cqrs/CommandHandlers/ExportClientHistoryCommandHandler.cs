@@ -26,6 +26,8 @@ namespace Lykke.Job.HistoryExportBuilder.Cqrs.CommandHandlers
         private readonly IExpiryWatcher _expiryWatcher;
         private readonly TimeSpan _ttl;
 
+        private const int _pageSize = 1000;
+
         public ExportClientHistoryCommandHandler(
             IClientAccountClient clientAccountClient,
             IHistoryClient historyClient,
@@ -53,12 +55,14 @@ namespace Lykke.Job.HistoryExportBuilder.Cqrs.CommandHandlers
             {
                 var result = new List<BaseHistoryModel>();
 
-                while (true)
+                for (int i = 0; ; i++)
                 {
                     var response = await _historyClient.HistoryApi.GetHistoryByWalletAsync(Guid.Parse(x.Id),
                         command.OperationTypes,
                         command.AssetId,
-                        command.AssetPairId);
+                        command.AssetPairId,
+                        i * _pageSize,
+                        _pageSize);
 
                     if (!response.Any())
                         break;
