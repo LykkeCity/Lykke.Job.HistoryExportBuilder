@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Lykke.Cqrs;
@@ -7,6 +9,9 @@ using Lykke.Job.HistoryExportBuilder.Contract.Events;
 using Lykke.Job.HistoryExportBuilder.Core.Domain;
 using Lykke.Job.HistoryExportBuilder.Core.Services;
 using Lykke.Job.HistoryExportBuilder.Models;
+using Lykke.Service.ClientAccount.Client;
+using Lykke.Service.History.Client;
+using Lykke.Service.History.Contracts.History;
 using Lykke.Service.OperationsHistory.Client;
 
 namespace Lykke.Job.HistoryExportBuilder.Cqrs.CommandHandlers
@@ -14,6 +19,8 @@ namespace Lykke.Job.HistoryExportBuilder.Cqrs.CommandHandlers
     public class ExportClientHistoryCommandHandler
     {
         private readonly IOperationsHistoryClient _operationsHistory;
+        private readonly IClientAccountClient _clientAccountClient;
+        private readonly IHistoryClient _historyClient;
         private readonly IFileMaker _fileMaker;
         private readonly IFileUploader _fileUploader;
         private readonly IFileMapper _fileMapper;
@@ -22,12 +29,16 @@ namespace Lykke.Job.HistoryExportBuilder.Cqrs.CommandHandlers
 
         public ExportClientHistoryCommandHandler(
             IOperationsHistoryClient operationsHistory,
+            IClientAccountClient clientAccountClient,
+            IHistoryClient historyClient,
             IFileMaker fileMaker,
             IFileUploader fileUploader,
             IFileMapper fileMapper,
             IExpiryWatcher expiryWatcher,
             TimeSpan ttl)
         {
+            _historyClient = historyClient;
+            _clientAccountClient = clientAccountClient;
             _operationsHistory = operationsHistory;
             _fileMaker = fileMaker;
             _fileUploader = fileUploader;
@@ -39,21 +50,56 @@ namespace Lykke.Job.HistoryExportBuilder.Cqrs.CommandHandlers
         [UsedImplicitly]
         public async Task<CommandHandlingResult> Handle(ExportClientHistoryCommand command, IEventPublisher publisher)
         {
-            var operationsHistoryResponse =
-                await _operationsHistory.GetByClientId(
-                    command.ClientId,
-                    command.OperationTypes,
-                    command.AssetId,
-                    command.AssetPairId,
-                    null,
-                    0);
+            dynamic history;
+            
+            if (command.OperationTypes2 != null)
+            {
+                var walletIds = await _clientAccountClient.GetClientWalletsFiltered(command.ClientId);
 
-            if (operationsHistoryResponse.Error != null)
-                throw new Exception(operationsHistoryResponse.Error.Message);
+                var tasks = walletIds.Select(async x =>
+                {
+                    var result = new List<BaseHistoryModel>();
+                    
+                    while (true)
+                    {
+                        var response = await _historyClient.HistoryApi.GetHistoryByWalletAsync(Guid.Parse(x.Id),
+                            command.OperationTypes2,
+                            command.AssetId,
+                            command.AssetPairId);
+
+                        if (!response.Any())
+                            break;
+                        
+                        result.AddRange(response);
+                    }
+
+                    return result;
+                });
+
+                await Task.WhenAll(tasks);
+
+                history = tasks.SelectMany(x => x.Result).Select(x => x.ToHistoryModel());
+            }
+            else
+            {
+                var response =
+                    await _operationsHistory.GetByClientId(
+                        command.ClientId,
+                        command.OperationTypes,
+                        command.AssetId,
+                        command.AssetPairId,
+                        null,
+                        0);
+                
+                if (response.Error != null)
+                    throw new Exception(response.Error.Message);
+
+                history = response.Records;
+            }
 
             var idForUri = await _fileMapper.MapAsync(command.ClientId, command.Id);
 
-            var file = await _fileMaker.MakeAsync(operationsHistoryResponse.Records);
+            var file = await _fileMaker.MakeAsync(history);
 
             var uri = await _fileUploader.UploadAsync(idForUri, FileType.Csv, file);
 

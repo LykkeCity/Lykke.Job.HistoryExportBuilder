@@ -28,6 +28,14 @@ OperationsHistoryServiceClient:
   ServiceUrl:
     settings-key: OperationsHistoryServiceUrl
 
+ClientAccountServiceClient:
+    ServiceUrl:
+        settings-key: ClientAccountServiceUrl
+
+HistoryServiceClient:
+    ServiceUrl:
+        settings-key: HistoryServiceUrl
+
 SagasRabbitMq:
   RabbitConnectionString:
     settings-key: SagasRabbitMqConnStr
