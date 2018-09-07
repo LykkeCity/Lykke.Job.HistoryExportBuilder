@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Lykke.Cqrs;
@@ -10,6 +12,7 @@ using Lykke.Job.HistoryExportBuilder.Core.Domain;
 using Lykke.Job.HistoryExportBuilder.Core.Services;
 using Lykke.Job.HistoryExportBuilder.Models;
 using Lykke.Service.ClientAccount.Client;
+using Lykke.Service.ClientAccount.Client.AutorestClient.Models;
 using Lykke.Service.History.Client;
 using Lykke.Service.History.Contracts.History;
 using Lykke.Service.OperationsHistory.Client;
@@ -49,15 +52,17 @@ namespace Lykke.Job.HistoryExportBuilder.Cqrs.CommandHandlers
         [UsedImplicitly]
         public async Task<CommandHandlingResult> Handle(ExportClientHistoryCommand command, IEventPublisher publisher)
         {
-            var walletIds = await _clientAccountClient.GetClientWalletsFiltered(command.ClientId);
+            var wallets = await _clientAccountClient.GetClientWalletsFiltered(command.ClientId, null, OwnerType.Spot);
 
+            var walletIds = wallets.Select(x => x.Type == WalletType.Trading.ToString() ? x.ClientId : x.Id);
+            
             var tasks = walletIds.Select(async x =>
             {
                 var result = new List<BaseHistoryModel>();
 
-                for (int i = 0; ; i++)
+                for (var i = 0; ; i++)
                 {
-                    var response = await _historyClient.HistoryApi.GetHistoryByWalletAsync(Guid.Parse(x.Id),
+                    var response = await _historyClient.HistoryApi.GetHistoryByWalletAsync(Guid.Parse(x),
                         command.OperationTypes,
                         command.AssetId,
                         command.AssetPairId,
@@ -69,7 +74,9 @@ namespace Lykke.Job.HistoryExportBuilder.Cqrs.CommandHandlers
 
                     result.AddRange(response);
                 }
-
+            
+                Console.WriteLine(result.Count());
+                
                 return result;
             });
 
