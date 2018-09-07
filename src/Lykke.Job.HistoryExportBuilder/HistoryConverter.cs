@@ -22,8 +22,7 @@ namespace Lykke.Job.HistoryExportBuilder
                     yield return cashout.ToHistoryModel();
                     break;
                 case TradeModel trade:
-                    foreach (var item in trade.ToHistoryModel())
-                        yield return item;
+                    yield return trade.ToHistoryModel();
                     break;
                 case OrderEventModel orderEvent:
                     yield return orderEvent.ToHistoryModel();
@@ -31,38 +30,22 @@ namespace Lykke.Job.HistoryExportBuilder
             }
         }
 
-        public static IEnumerable<HistoryModel> ToHistoryModel(this TradeModel trade)
+        public static HistoryModel ToHistoryModel(this TradeModel trade)
         {
-            yield return new HistoryModel
+            return new HistoryModel
             {
                 Id = trade.Id.ToString(),
                 DateTime = trade.Timestamp,
                 Type = HistoryType.Trade,
                 Asset = trade.BaseAssetId,
                 Amount = trade.BaseVolume,
+                OppositeAmount = trade.QuotingVolume,
                 AssetPair = trade.AssetPairId,
                 Price = trade.Price,
                 State = HistoryState.Finished,
-                FeeSize = trade.FeeSize > 0 && trade.FeeAssetId == trade.BaseAssetId
-                    ? trade.FeeSize.GetValueOrDefault(0)
-                    : 0,
-                FeeType = FeeType.Absolute
-            };
-
-            yield return new HistoryModel
-            {
-                Id = trade.Id.ToString(),
-                DateTime = trade.Timestamp,
-                Type = HistoryType.Trade,
-                Asset = trade.QuotingAssetId,
-                Amount = trade.QuotingVolume,
-                AssetPair = trade.AssetPairId,
-                Price = trade.Price,
-                State = HistoryState.Finished,
-                FeeSize = trade.FeeSize > 0 && trade.FeeAssetId == trade.QuotingAssetId
-                    ? trade.FeeSize.GetValueOrDefault(0)
-                    : 0,
-                FeeType = FeeType.Absolute
+                FeeSize = trade.FeeSize.GetValueOrDefault(0),
+                FeeType = FeeType.Absolute,
+                FeeAssetId = trade.FeeAssetId
             };
         }
 
@@ -77,7 +60,8 @@ namespace Lykke.Job.HistoryExportBuilder
                 Amount = cashin.Volume,
                 State = cashin.State,
                 FeeSize = cashin.FeeSize.GetValueOrDefault(0),
-                FeeType = FeeType.Absolute
+                FeeType = FeeType.Absolute,
+                FeeAssetId = cashin.AssetId
             };
         }
 
@@ -92,7 +76,8 @@ namespace Lykke.Job.HistoryExportBuilder
                 Amount = cashout.Volume,
                 State = cashout.State,
                 FeeSize = cashout.FeeSize.GetValueOrDefault(0),
-                FeeType = FeeType.Absolute
+                FeeType = FeeType.Absolute,
+                FeeAssetId = cashout.AssetId
             };
         }
 

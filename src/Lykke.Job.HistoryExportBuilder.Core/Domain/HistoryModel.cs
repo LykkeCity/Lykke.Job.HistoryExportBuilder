@@ -19,6 +19,8 @@ namespace Lykke.Job.HistoryExportBuilder.Core.Domain
         public HistoryState State { get; set; }
 
         public decimal Amount { get; set; }
+        
+        public decimal? OppositeAmount { get; set; }
 
         public string Asset { get; set; }
 
@@ -30,5 +32,7 @@ namespace Lykke.Job.HistoryExportBuilder.Core.Domain
 
         [JsonConverter(typeof(StringEnumConverter))]
         public FeeType FeeType { get; set; }
+        
+        public string FeeAssetId { get; set; }
     }
 }
