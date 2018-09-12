@@ -80,7 +80,7 @@ namespace Lykke.Job.HistoryExportBuilder.Cqrs.CommandHandlers
 
             await Task.WhenAll(tasks);
 
-            var history = tasks.SelectMany(x => x.Result).SelectMany(x => x.ToHistoryModel()).OrderByDescending(x => x.DateTime);
+            var history = tasks.SelectMany(x => x.Result).Select(x => x.ToHistoryModel()).OrderByDescending(x => x.DateTime);
 
             var idForUri = await _fileMapper.MapAsync(command.ClientId, command.Id);
 

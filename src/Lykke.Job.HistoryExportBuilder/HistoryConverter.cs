@@ -11,23 +11,25 @@ namespace Lykke.Job.HistoryExportBuilder
 {
     public static class HistoryOperationToResponseConverter
     {
-        public static IEnumerable<HistoryModel> ToHistoryModel(this BaseHistoryModel baseModel)
+        public static HistoryModel ToHistoryModel(this BaseHistoryModel baseModel)
         {
             switch (baseModel)
             {
                 case CashinModel cashin:
-                    yield return cashin.ToHistoryModel();
+                    return cashin.ToHistoryModel();
                     break;
                 case CashoutModel cashout:
-                    yield return cashout.ToHistoryModel();
+                    return cashout.ToHistoryModel();
                     break;
                 case TradeModel trade:
-                    yield return trade.ToHistoryModel();
+                    return trade.ToHistoryModel();
                     break;
                 case OrderEventModel orderEvent:
-                    yield return orderEvent.ToHistoryModel();
+                    return orderEvent.ToHistoryModel();
                     break;
             }
+            
+            throw new ArgumentException($"{baseModel.Id} has unrecognized type");
         }
 
         public static HistoryModel ToHistoryModel(this TradeModel trade)
