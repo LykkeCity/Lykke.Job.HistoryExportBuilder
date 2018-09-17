@@ -52,35 +52,24 @@ namespace Lykke.Job.HistoryExportBuilder.Cqrs.CommandHandlers
         [UsedImplicitly]
         public async Task<CommandHandlingResult> Handle(ExportClientHistoryCommand command, IEventPublisher publisher)
         {
-            var wallets = await _clientAccountClient.GetClientWalletsFiltered(command.ClientId, null, OwnerType.Spot);
+            var result = new List<BaseHistoryModel>();
 
-            var walletIds = wallets.Select(x => x.Type == WalletType.Trading.ToString() ? x.ClientId : x.Id);
-            
-            var tasks = walletIds.Select(async x =>
+            for (var i = 0; ; i++)
             {
-                var result = new List<BaseHistoryModel>();
+                var response = await _historyClient.HistoryApi.GetHistoryByWalletAsync(Guid.Parse(command.ClientId),
+                    command.OperationTypes,
+                    command.AssetId,
+                    command.AssetPairId,
+                    i * _pageSize,
+                    _pageSize);
 
-                for (var i = 0; ; i++)
-                {
-                    var response = await _historyClient.HistoryApi.GetHistoryByWalletAsync(Guid.Parse(x),
-                        command.OperationTypes,
-                        command.AssetId,
-                        command.AssetPairId,
-                        i * _pageSize,
-                        _pageSize);
+                if (!response.Any())
+                    break;
 
-                    if (!response.Any())
-                        break;
+                result.AddRange(response);
+            }
 
-                    result.AddRange(response);
-                }
-                
-                return result;
-            });
-
-            await Task.WhenAll(tasks);
-
-            var history = tasks.SelectMany(x => x.Result).Select(x => x.ToHistoryModel()).OrderByDescending(x => x.DateTime);
+            var history = result.Select(x => x.ToHistoryModel()).OrderByDescending(x => x.DateTime);
 
             var idForUri = await _fileMapper.MapAsync(command.ClientId, command.Id);
 

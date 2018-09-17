@@ -17,16 +17,12 @@ namespace Lykke.Job.HistoryExportBuilder
             {
                 case CashinModel cashin:
                     return cashin.ToHistoryModel();
-                    break;
                 case CashoutModel cashout:
                     return cashout.ToHistoryModel();
-                    break;
                 case TradeModel trade:
                     return trade.ToHistoryModel();
-                    break;
                 case OrderEventModel orderEvent:
                     return orderEvent.ToHistoryModel();
-                    break;
             }
             
             throw new ArgumentException($"{baseModel.Id} has unrecognized type");
