@@ -9,7 +9,6 @@ using JetBrains.Annotations;
 using Lykke.Job.HistoryExportBuilder.Core.Domain;
 using Lykke.Job.HistoryExportBuilder.Core.Services;
 using Lykke.Service.Assets.Client;
-using Lykke.Service.OperationsHistory.AutorestClient.Models;
 
 namespace Lykke.Job.HistoryExportBuilder.Services
 {
@@ -57,9 +56,7 @@ namespace Lykke.Job.HistoryExportBuilder.Services
                                 x.FeeSize != 0
                                     ? (x.FeeAssetId != null && assets.ContainsKey(x.FeeAssetId) ? (assets[x.FeeAssetId].DisplayId ?? x.FeeAssetId) : x.Asset)
                                     : null,
-                            Fee = x.FeeSize != 0
-                                ? Convert.ToDecimal(x.FeeSize) * (x.FeeType == FeeType.Relative ? x.Amount : 1)
-                                : 0
+                            Fee = x.FeeSize
                         };
                     }));
 

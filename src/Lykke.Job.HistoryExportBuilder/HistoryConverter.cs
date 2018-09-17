@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using Lykke.Job.HistoryExportBuilder.Core.Domain;
 using Lykke.Service.History.Contracts.Enums;
 using Lykke.Service.History.Contracts.History;
-using Lykke.Service.OperationsHistory.AutorestClient.Models;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 
 namespace Lykke.Job.HistoryExportBuilder
 {
@@ -42,7 +38,6 @@ namespace Lykke.Job.HistoryExportBuilder
                 Price = trade.Price,
                 State = HistoryState.Finished,
                 FeeSize = trade.FeeSize.GetValueOrDefault(0),
-                FeeType = FeeType.Absolute,
                 FeeAssetId = trade.FeeAssetId
             };
         }
@@ -58,7 +53,6 @@ namespace Lykke.Job.HistoryExportBuilder
                 Amount = cashin.Volume,
                 State = cashin.State,
                 FeeSize = cashin.FeeSize.GetValueOrDefault(0),
-                FeeType = FeeType.Absolute,
                 FeeAssetId = cashin.AssetId
             };
         }
@@ -74,7 +68,6 @@ namespace Lykke.Job.HistoryExportBuilder
                 Amount = cashout.Volume,
                 State = cashout.State,
                 FeeSize = cashout.FeeSize.GetValueOrDefault(0),
-                FeeType = FeeType.Absolute,
                 FeeAssetId = cashout.AssetId
             };
         }
