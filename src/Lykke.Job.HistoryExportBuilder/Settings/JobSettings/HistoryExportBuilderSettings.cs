@@ -6,5 +6,6 @@ namespace Lykke.Job.HistoryExportBuilder.Settings.JobSettings
     {
         public DbSettings Db { get; set; }
         public TimeSpan GeneratedFileTtl { get; set; }
+        public CqrsSettings Cqrs { get; set; }
     }
 }

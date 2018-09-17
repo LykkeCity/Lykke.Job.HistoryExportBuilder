@@ -1,6 +1,4 @@
-﻿using System;
-using Lykke.Service.History.Contracts.Enums;
-using Lykke.Service.OperationsHistory.AutorestClient.Models;
+﻿using Lykke.Service.History.Contracts.Enums;
 using MessagePack;
 
 namespace Lykke.Job.HistoryExportBuilder.Contract.Commands

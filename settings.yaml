@@ -20,13 +20,15 @@ HistoryExportBuilderJob:
     GeneratedFileTtl:
       settings-key: HistoryExportFileTtl
 
+    Cqrs:
+        RabbitConnString:
+            settings-key: CqrsRabbitConnString
+            types:
+                - RabbitMq	
+
 MonitoringServiceClient:
   MonitoringServiceUrl:
     settings-key: MonitoringServiceUrl
-
-ClientAccountServiceClient:
-    ServiceUrl:
-        settings-key: ClientAccountServiceUrl
 
 HistoryServiceClient:
     ServiceUrl:

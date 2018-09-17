@@ -1,6 +1,5 @@
 ﻿using System;
 using Lykke.Service.History.Contracts.Enums;
-using Lykke.Service.OperationsHistory.AutorestClient.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -29,9 +28,6 @@ namespace Lykke.Job.HistoryExportBuilder.Core.Domain
         public decimal? Price { get; set; }
 
         public decimal FeeSize { get; set; }
-
-        [JsonConverter(typeof(StringEnumConverter))]
-        public FeeType FeeType { get; set; }
         
         public string FeeAssetId { get; set; }
     }
