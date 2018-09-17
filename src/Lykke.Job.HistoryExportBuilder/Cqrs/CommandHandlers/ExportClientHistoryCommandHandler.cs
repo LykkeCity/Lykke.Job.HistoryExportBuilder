@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Lykke.Cqrs;
@@ -7,28 +9,31 @@ using Lykke.Job.HistoryExportBuilder.Contract.Events;
 using Lykke.Job.HistoryExportBuilder.Core.Domain;
 using Lykke.Job.HistoryExportBuilder.Core.Services;
 using Lykke.Job.HistoryExportBuilder.Models;
-using Lykke.Service.OperationsHistory.Client;
+using Lykke.Service.History.Client;
+using Lykke.Service.History.Contracts.History;
 
 namespace Lykke.Job.HistoryExportBuilder.Cqrs.CommandHandlers
 {
     public class ExportClientHistoryCommandHandler
     {
-        private readonly IOperationsHistoryClient _operationsHistory;
+        private readonly IHistoryClient _historyClient;
         private readonly IFileMaker _fileMaker;
         private readonly IFileUploader _fileUploader;
         private readonly IFileMapper _fileMapper;
         private readonly IExpiryWatcher _expiryWatcher;
         private readonly TimeSpan _ttl;
 
+        private const int PageSize = 1000;
+
         public ExportClientHistoryCommandHandler(
-            IOperationsHistoryClient operationsHistory,
+            IHistoryClient historyClient,
             IFileMaker fileMaker,
             IFileUploader fileUploader,
             IFileMapper fileMapper,
             IExpiryWatcher expiryWatcher,
             TimeSpan ttl)
         {
-            _operationsHistory = operationsHistory;
+            _historyClient = historyClient;
             _fileMaker = fileMaker;
             _fileUploader = fileUploader;
             _fileMapper = fileMapper;
@@ -39,21 +44,28 @@ namespace Lykke.Job.HistoryExportBuilder.Cqrs.CommandHandlers
         [UsedImplicitly]
         public async Task<CommandHandlingResult> Handle(ExportClientHistoryCommand command, IEventPublisher publisher)
         {
-            var operationsHistoryResponse =
-                await _operationsHistory.GetByClientId(
-                    command.ClientId,
+            var result = new List<BaseHistoryModel>();
+
+            for (var i = 0; ; i++)
+            {
+                var response = await _historyClient.HistoryApi.GetHistoryByWalletAsync(Guid.Parse(command.ClientId),
                     command.OperationTypes,
                     command.AssetId,
                     command.AssetPairId,
-                    null,
-                    0);
+                    i * PageSize,
+                    PageSize);
 
-            if (operationsHistoryResponse.Error != null)
-                throw new Exception(operationsHistoryResponse.Error.Message);
+                if (!response.Any())
+                    break;
+
+                result.AddRange(response);
+            }
+
+            var history = result.Select(x => x.ToHistoryModel()).OrderByDescending(x => x.DateTime);
 
             var idForUri = await _fileMapper.MapAsync(command.ClientId, command.Id);
 
-            var file = await _fileMaker.MakeAsync(operationsHistoryResponse.Records);
+            var file = await _fileMaker.MakeAsync(history);
 
             var uri = await _fileUploader.UploadAsync(idForUri, FileType.Csv, file);
 

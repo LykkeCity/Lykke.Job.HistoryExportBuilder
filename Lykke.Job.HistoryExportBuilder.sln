@@ -21,7 +21,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lykke.Job.HistoryExportBuil
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "4. Contract", "4. Contract", "{A2954189-CBDA-4FD0-BAC0-41EF119C143D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lykke.Job.HistoryExportBuilder.Contract", "client\Lykke.Job.HistoryExportBuilder.Contract\Lykke.Job.HistoryExportBuilder.Contract.csproj", "{42685A7B-FD25-4A24-B57D-E578841C98B1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lykke.Job.HistoryExportBuilder.Contract", "client\Lykke.Job.HistoryExportBuilder.Contract\Lykke.Job.HistoryExportBuilder.Contract.csproj", "{42685A7B-FD25-4A24-B57D-E578841C98B1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7C73B5E0-3B52-490D-AE65-C9779E13FEAA}"
+	ProjectSection(SolutionItems) = preProject
+		settings.yaml = settings.yaml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

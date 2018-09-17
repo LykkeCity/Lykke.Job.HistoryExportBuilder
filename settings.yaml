@@ -20,22 +20,20 @@ HistoryExportBuilderJob:
     GeneratedFileTtl:
       settings-key: HistoryExportFileTtl
 
+    Cqrs:
+        RabbitConnString:
+            settings-key: CqrsRabbitConnString
+            types:
+                - RabbitMq	
+
 MonitoringServiceClient:
   MonitoringServiceUrl:
     settings-key: MonitoringServiceUrl
 
-OperationsHistoryServiceClient:
-  ServiceUrl:
-    settings-key: OperationsHistoryServiceUrl
+HistoryServiceClient:
+    ServiceUrl:
+        settings-key: HistoryServiceUrl
 
-SagasRabbitMq:
-  RabbitConnectionString:
-    settings-key: SagasRabbitMqConnStr
-    types:
-      - RabbitMq
-  
-  RetryDelay:
-    settings-key: SagasRetryDelay
 SlackNotifications:
   AzureQueue:
     ConnectionString:
