@@ -34,14 +34,6 @@ HistoryServiceClient:
     ServiceUrl:
         settings-key: HistoryServiceUrl
 
-SagasRabbitMq:
-  RabbitConnectionString:
-    settings-key: SagasRabbitMqConnStr
-    types:
-      - RabbitMq
-  
-  RetryDelay:
-    settings-key: SagasRetryDelay
 SlackNotifications:
   AzureQueue:
     ConnectionString:
