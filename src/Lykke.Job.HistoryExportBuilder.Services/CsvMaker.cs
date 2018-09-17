@@ -26,12 +26,12 @@ namespace Lykke.Job.HistoryExportBuilder.Services
 
         public async Task<MemoryStream> MakeAsync(IEnumerable<HistoryModel> operations)
         {
-            var assets = (await _assetsServiceWithCache.GetAllAssetsAsync()).ToDictionary(x => x.Id);
+            var assets = (await _assetsServiceWithCache.GetAllAssetsAsync(true)).ToDictionary(x => x.Id);
             var assetPairs = (await _assetsServiceWithCache.GetAllAssetPairsAsync()).ToDictionary(x => x.Id);
 
             using (var stream = new MemoryStream())
             {
-                using (var streamWriter = new StreamWriter(stream) {AutoFlush = true})
+                using (var streamWriter = new StreamWriter(stream) { AutoFlush = true })
                 {
                     var userCsv = new CsvWriter(streamWriter);
                     userCsv.Configuration.RegisterClassMap<HistoryOperationCsvEntryMap>();
@@ -39,6 +39,10 @@ namespace Lykke.Job.HistoryExportBuilder.Services
                     userCsv.WriteRecords(operations.Select(x =>
                     {
                         var assetPair = x.AssetPair != null ? assetPairs[x.AssetPair] : null;
+                        var baseAsset = x.Asset ?? assetPair?.BaseAssetId;
+                        var quoteAsset = assetPair?.QuotingAssetId;
+                        var baseAssetName = baseAsset != null && assets.ContainsKey(baseAsset) ? (assets[baseAsset].DisplayId ?? baseAsset) : baseAsset;
+                        var quoteAssetName = quoteAsset != null && assets.ContainsKey(quoteAsset) ? (assets[quoteAsset].DisplayId ?? quoteAsset) : quoteAsset;
 
                         return new HistoryOperationCsvEntry
                         {
@@ -46,12 +50,12 @@ namespace Lykke.Job.HistoryExportBuilder.Services
                             Type = x.Type.ToString(),
                             Exchange = "Lykke",
                             BaseAmount = x.Amount,
-                            BaseCurrency = assets[x.Asset ?? assetPair.BaseAssetId].DisplayId,
+                            BaseCurrency = baseAssetName,
                             QuoteAmount = x.OppositeAmount,
-                            QuoteCurrency = assetPair != null ? assets[assetPair.QuotingAssetId].DisplayId : null,
+                            QuoteCurrency = quoteAssetName,
                             FeeCurrency =
                                 x.FeeSize != 0
-                                    ? (x.FeeAssetId != null ? assets[x.FeeAssetId].DisplayId : x.Asset)
+                                    ? (x.FeeAssetId != null && assets.ContainsKey(x.FeeAssetId) ? (assets[x.FeeAssetId].DisplayId ?? x.FeeAssetId) : x.Asset)
                                     : null,
                             Fee = x.FeeSize != 0
                                 ? Convert.ToDecimal(x.FeeSize) * (x.FeeType == FeeType.Relative ? x.Amount : 1)
