@@ -37,7 +37,7 @@ namespace Lykke.Job.HistoryExportBuilder.Services
 
                     userCsv.WriteRecords(operations.Select(x =>
                     {
-                        var assetPair = x.AssetPair != null ? assetPairs[x.AssetPair] : null;
+                        var assetPair = x.AssetPair != null && assetPairs.ContainsKey(x.AssetPair) ? assetPairs[x.AssetPair] : null;
                         var baseAsset = x.Asset ?? assetPair?.BaseAssetId;
                         var quoteAsset = assetPair?.QuotingAssetId;
                         var baseAssetName = baseAsset != null && assets.ContainsKey(baseAsset) ? (assets[baseAsset].DisplayId ?? baseAsset) : baseAsset;
