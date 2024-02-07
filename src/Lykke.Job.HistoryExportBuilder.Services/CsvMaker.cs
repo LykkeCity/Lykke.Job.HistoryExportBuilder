@@ -56,7 +56,8 @@ namespace Lykke.Job.HistoryExportBuilder.Services
                                 x.FeeSize != 0
                                     ? (x.FeeAssetId != null && assets.ContainsKey(x.FeeAssetId) ? (assets[x.FeeAssetId].DisplayId ?? x.FeeAssetId) : x.Asset)
                                     : null,
-                            Fee = x.FeeSize
+                            Fee = x.FeeSize,
+                            TransactionHash = x.TransactionHash
                         };
                     }));
 
@@ -79,8 +80,9 @@ namespace Lykke.Job.HistoryExportBuilder.Services
         public string BaseCurrency { get; set; }
         public decimal? QuoteAmount { get; set; }
         public string QuoteCurrency { get; set; }
-        public decimal Fee { set; get; }
-        public string FeeCurrency { set; get; }
+        public decimal Fee { get; set; }
+        public string FeeCurrency { get; set; }
+        public string TransactionHash { get; set; }
     }
 
     public sealed class HistoryOperationCsvEntryMap : ClassMap<HistoryOperationCsvEntry>
@@ -96,6 +98,7 @@ namespace Lykke.Job.HistoryExportBuilder.Services
             Map(m => m.QuoteCurrency).Name("Quote Currency").NameIndex(6);
             Map(m => m.Fee).Name("Fee").NameIndex(7);
             Map(m => m.FeeCurrency).Name("Fee Currency").NameIndex(8);
+            Map(m => m.TransactionHash).Name("Transaction hash").NameIndex(9);
         }
     }
 }

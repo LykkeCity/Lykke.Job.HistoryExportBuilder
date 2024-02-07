@@ -53,7 +53,8 @@ namespace Lykke.Job.HistoryExportBuilder
                 Amount = cashin.Volume,
                 State = cashin.State,
                 FeeSize = cashin.FeeSize.GetValueOrDefault(0),
-                FeeAssetId = cashin.AssetId
+                FeeAssetId = cashin.AssetId,
+                TransactionHash = cashin.BlockchainHash
             };
         }
 
@@ -68,7 +69,8 @@ namespace Lykke.Job.HistoryExportBuilder
                 Amount = cashout.Volume,
                 State = cashout.State,
                 FeeSize = cashout.FeeSize.GetValueOrDefault(0),
-                FeeAssetId = cashout.AssetId
+                FeeAssetId = cashout.AssetId,
+                TransactionHash = cashout.BlockchainHash
             };
         }
 
