@@ -30,5 +30,6 @@ namespace Lykke.Job.HistoryExportBuilder.Core.Domain
         public decimal FeeSize { get; set; }
         
         public string FeeAssetId { get; set; }
+        public string TransactionHash { get; set; }
     }
 }
